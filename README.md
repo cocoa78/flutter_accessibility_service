@@ -2,7 +2,7 @@
 
 a plugin for interacting with Accessibility Service in Android.
 
-Accessibility services are intended to assist users with disabilities in using Android devices and apps, or I can say to get android os events like keyboard key press events or notification received events etc.
+微信一键分享
 
 for more info check [Accessibility Service](https://developer.android.com/reference/android/accessibilityservice/AccessibilityService)
 
@@ -20,12 +20,11 @@ Inside AndroidManifest add this to bind your accessibility service with your app
 ```xml
     .
     .
-    <service android:name="slayer.accessibility.service.flutter_accessibility_service.AccessibilityListener"
-                android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:exported="false">
-      <intent-filter>
-        <action android:name="android.accessibilityservice.AccessibilityService" />
-      </intent-filter>
-      <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibilityservice" />
+    <service  android:name="slayer.accessibility.service.flutter_accessibility_service.AccessibilityListener" android:label="@string/accessibility_service_title" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibilityservice" />
     </service>
     .
     .
@@ -38,13 +37,25 @@ Create Accesiblity config file named `accessibilityservice.xml` inside `res/xml`
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeWindowsChanged|typeWindowStateChanged|typeWindowContentChanged"
-    android:accessibilityFeedbackType="feedbackVisual"
-    android:notificationTimeout="300"
-    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagRequestTouchExplorationMode|flagRequestEnhancedWebAccessibility|flagReportViewIds|flagRetrieveInteractiveWindows"
+    android:description="@string/accessibility_service_description" 
+    android:accessibilityEventTypes="typeAllMask"
+    android:accessibilityFeedbackType="feedbackAllMask"
+    android:notificationTimeout="100"
+    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagRetrieveInteractiveWindows"
     android:canRetrieveWindowContent="true"
+    android:packageNames="com.tencent.mm"
 >
 </accessibility-service>
+
+```
+
+创建无障碍服务名称 和描述 文件strings.xml  在 `res/values`, and add the following code inside it:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resource>
+    <string name="accessibility_service_title">App一键分享</string>
+    <string name="accessibility_service_description">开启该服务后,点击一键分享即可帮您自动粘贴文字,自动选择图片,无需您手动操作.\n\n个别型号的安卓手机,退出App后,手机会主动关闭该功能导致该功能失效.出现该情况时,您可以尝试先关闭再重新开启该服务,或者重启手机.</string>
+</resource>
 
 ```
 
@@ -58,69 +69,12 @@ Create Accesiblity config file named `accessibilityservice.xml` inside `res/xml`
  /// it will open the accessibility settings page and return `true` once the permission granted.
  final bool status = await FlutterAccessibilityService.requestAccessibilityPermission();
 
- /// stream the incoming Accessibility events
-  FlutterAccessibilityService.accessStream.listen((event) {
-    log("Current Event: $event");
-
   /*
-  Current Event: AccessibilityEvent: (
-     Action Type: 0
-     Event Time: 2022-04-11 14:19:56.556834
-     Package Name: com.facebook.katana
-     Event Type: EventType.typeWindowContentChanged
-     Captured Text: events you may like
-     content Change Types: ContentChangeTypes.contentChangeTypeSubtree
-     Movement Granularity: 0
-     Is Active: true
-     is focused: true
-     in Pip: false
-     window Type: WindowType.typeApplication
-     Screen bounds: left: 0 - right: 720 - top: 0 - bottom: 1544 - width: 720 - height: 1544
-)
-  */
+   * 一键分享微信朋友圈
+   * @param params Map<String, dynamic> , 例如{"text":"demo","waitingImageCount":1}
+   *  text : 待分享文本, 请确保在调用该方法前, 文本已保存粘贴板位置顶部
+      waitingImageCount:  待选择图片数量, 请确保在调用该方法前, 图片刚已保存到相册中,且在相册位置顶部,否则可能分享图片选择有问题
+   */
+ await FlutterAccessibilityService.shareWechatTimeline();
 
-  });
-```
-
-The `AccessibilityEvent` provides:
-
-```dart
-  /// the performed action that triggered this event
-  int? actionType;
-
-  /// the time in which this event was sent.
-  DateTime? eventTime;
-
-  /// the package name of the source
-  String? packageName;
-
-  /// the event type.
-  EventType? eventType;
-
-  /// Gets the text of this node.
-  String? capturedText;
-
-  /// the bit mask of change types signaled by a `TYPE_WINDOW_CONTENT_CHANGED` event or `TYPE_WINDOW_STATE_CHANGED`. A single event may represent multiple change types
-  ContentChangeTypes? contentChangeTypes;
-
-  /// the movement granularity that was traversed
-  int? movementGranularity;
-
-  /// the type of the window
-  WindowType? windowType;
-
-  /// check if this window is active. An active window is the one the user is currently touching or the window has input focus and the user is not touching any window.
-  bool? isActive;
-
-  /// check if this window has input focus.
-  bool? isFocused;
-
-  /// Check if the window is in picture-in-picture mode.
-  bool? isPip;
-
-  /// Gets the node bounds in screen coordinates.
-  ScreenBounds? screenBounds;
-
-  /// Get the node childrens and sub childrens text
-  List<String>? nodesText;
 ```

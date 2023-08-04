@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resource>
+    <string name="accessibility_service_title">\u26A1App一键分享</string>
+    <string name="accessibility_service_description">开启该服务后,点击一键分享即可帮您自动粘贴文字,自动选择图片,无需您手动操作.\n\n个别型号的安卓手机,退出App后,手机会主动关闭该功能导致该功能失效.出现该情况时,您可以尝试先关闭再重新开启该服务,或者重启手机.</string>
+</resource>

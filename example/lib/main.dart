@@ -1,8 +1,7 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_accessibility_service/accessibility_event.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_accessibility_service/flutter_accessibility_service.dart';
 
@@ -18,8 +17,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  StreamSubscription<AccessibilityEvent>? _subscription;
-  List<AccessibilityEvent?> events = [];
 
   @override
   void initState() {
@@ -35,13 +32,9 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    TextButton(
+              TextButton(
                       onPressed: () async {
                         await FlutterAccessibilityService
                             .requestAccessibilityPermission();
@@ -59,41 +52,18 @@ class _MyAppState extends State<MyApp> {
                     ),
                     const SizedBox(height: 20.0),
                     TextButton(
-                      onPressed: () {
-                        if (_subscription?.isPaused ?? false) {
-                          _subscription?.resume();
-                          return;
-                        }
-                        _subscription = FlutterAccessibilityService.accessStream
-                            .listen((event) {
-                          log("$event");
-                          setState(() {
-                            events.add(event);
-                          });
+                      onPressed: () async {
+                        String text = '我是demo';
+                        //复制文字到粘贴板
+                        await Clipboard.setData(ClipboardData(text: text));
+                        Map params = Map.from({
+                          "text": text,
+                          "waitingImageCount": 5
                         });
+                        FlutterAccessibilityService.shareWechatTimeline(params);
                       },
-                      child: const Text("Start Stream"),
-                    ),
-                    const SizedBox(height: 20.0),
-                    TextButton(
-                      onPressed: () {
-                        _subscription?.cancel();
-                      },
-                      child: const Text("Stop Stream"),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: events.length,
-                  itemBuilder: (_, index) => ListTile(
-                    title: Text(events[index]!.packageName!),
-                    subtitle: Text(events[index]!.capturedText ?? ""),
-                  ),
-                ),
-              )
+                      child: const Text("一键分享"),
+                    )
             ],
           ),
         ),

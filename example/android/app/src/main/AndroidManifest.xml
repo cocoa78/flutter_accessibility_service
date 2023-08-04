@@ -2,7 +2,7 @@
     <application android:label="flutter_accessibility_service_example" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">
 
 
-        <service android:name="slayer.accessibility.service.flutter_accessibility_service.AccessibilityListener" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+        <service  android:name="slayer.accessibility.service.flutter_accessibility_service.AccessibilityListener" android:label="@string/accessibility_service_title" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>

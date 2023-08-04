@@ -14,3 +14,8 @@
 ## 0.2.2
 
 - get the node childrens and sub childrens text
+
+
+## 0.3.0
+
+- 新增微信一键分享，删除event broadcast

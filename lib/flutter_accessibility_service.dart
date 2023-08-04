@@ -3,28 +3,12 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:flutter_accessibility_service/accessibility_event.dart';
 
 class FlutterAccessibilityService {
   FlutterAccessibilityService._();
 
   static const MethodChannel _methodeChannel =
       MethodChannel('x-slayer/accessibility_channel');
-  static const EventChannel _eventChannel =
-      EventChannel('x-slayer/accessibility_event');
-  static Stream<AccessibilityEvent>? _stream;
-
-  /// stream the incoming Accessibility events
-  static Stream<AccessibilityEvent> get accessStream {
-    if (Platform.isAndroid) {
-      _stream ??=
-          _eventChannel.receiveBroadcastStream().map<AccessibilityEvent>(
-                (event) => AccessibilityEvent.fromMap(event),
-              );
-      return _stream!;
-    }
-    throw Exception("Accessibility API exclusively available on Android!");
-  }
 
   /// request accessibility permission
   /// it will open the accessibility settings page and return `true` once the permission granted.
@@ -47,5 +31,19 @@ class FlutterAccessibilityService {
       log("$error");
       return false;
     }
+  }
+ 
+  /*
+   * 一键分享微信朋友圈
+   * @param params Map<String, dynamic> , 例如{"text":"demo","waitingImageCount":1}
+   *  text : 待分享文本, 请确保在调用该方法前, 文本已保存粘贴板位置顶部
+      waitingImageCount:  待选择图片数量, 请确保在调用该方法前, 图片刚已保存到相册中,且在相册位置顶部,否则可能分享图片选择有问题
+   */
+  static void shareWechatTimeline(Map params) async {
+    if (Platform.isAndroid) {
+      await _methodeChannel
+            .invokeMethod('shareWechatTimeline',params);
+    }
+    throw Exception("Accessibility API exclusively available on Android!");
   }
 }

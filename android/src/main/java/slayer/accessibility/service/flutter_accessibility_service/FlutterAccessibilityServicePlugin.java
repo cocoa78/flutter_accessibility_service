@@ -18,6 +18,8 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
+import android.content.ComponentName;
+import java.util.Map;
 
 /**
  * FlutterAccessibilityServicePlugin
@@ -25,11 +27,8 @@ import io.flutter.plugin.common.PluginRegistry;
 public class FlutterAccessibilityServicePlugin implements FlutterPlugin, ActivityAware, MethodCallHandler, PluginRegistry.ActivityResultListener, EventChannel.StreamHandler {
 
     private static final String CHANNEL_TAG = "x-slayer/accessibility_channel";
-    private static final String EVENT_TAG = "x-slayer/accessibility_event";
 
     private MethodChannel channel;
-    private AccessibilityReceiver accessibilityReceiver;
-    private EventChannel eventChannel;
     private Context context;
     private Activity mActivity;
 
@@ -41,8 +40,6 @@ public class FlutterAccessibilityServicePlugin implements FlutterPlugin, Activit
         context = flutterPluginBinding.getApplicationContext();
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL_TAG);
         channel.setMethodCallHandler(this);
-        eventChannel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), EVENT_TAG);
-        eventChannel.setStreamHandler(this);
 
     }
 
@@ -54,6 +51,24 @@ public class FlutterAccessibilityServicePlugin implements FlutterPlugin, Activit
         } else if (call.method.equals("requestAccessibilityPermission")) {
             Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
             mActivity.startActivityForResult(intent, REQUEST_CODE_FOR_ACCESSIBILITY);
+        }  else if (call.method.equals("shareWechatTimeline")) {
+            //外部传参
+            Object params = call.arguments();
+            Map<String, Object> paramMap = (Map<String, Object>) params;
+            ShareInfo.text = (String) paramMap.get("text");
+            ShareInfo.waitingImageCount = (int) paramMap.get("waitingImageCount");
+            //设置准备启动
+            AccessibilityListener.step = Step.Launcher;
+            
+            Intent intent = new Intent(); 
+            // //打开微信App
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            intent.setComponent(new ComponentName("com.tencent.mm", "com.tencent.mm.ui.LauncherUI"));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mActivity.startActivity(intent);
+            
         } else {
             result.notImplemented();
         }
@@ -62,7 +77,6 @@ public class FlutterAccessibilityServicePlugin implements FlutterPlugin, Activit
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
-        eventChannel.setStreamHandler(null);
     }
 
     @Override
@@ -71,9 +85,6 @@ public class FlutterAccessibilityServicePlugin implements FlutterPlugin, Activit
             /// Set up receiver
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(AccessibilityListener.ACCESSIBILITY_INTENT);
-
-            accessibilityReceiver = new AccessibilityReceiver(events);
-            context.registerReceiver(accessibilityReceiver, intentFilter);
 
             /// Set up listener intent
             Intent listenerIntent = new Intent(context, AccessibilityListener.class);
@@ -84,8 +95,6 @@ public class FlutterAccessibilityServicePlugin implements FlutterPlugin, Activit
 
     @Override
     public void onCancel(Object arguments) {
-        context.unregisterReceiver(accessibilityReceiver);
-        accessibilityReceiver = null;
     }
 
     @Override
