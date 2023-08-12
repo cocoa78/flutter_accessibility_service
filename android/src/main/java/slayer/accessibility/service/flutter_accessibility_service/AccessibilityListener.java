@@ -194,6 +194,7 @@ public class AccessibilityListener extends AccessibilityService {
 
     // 选择图片完成
     private void selectImageFinished() {
+        ShareInfo.waitingImageCount = 0;
         timeScheduler(() -> {
             step = Step.Upload;
             AccessibilityNodeInfo rootNode = getRootNodeInfo();
@@ -215,11 +216,15 @@ public class AccessibilityListener extends AccessibilityService {
             return;
         }
 
-        // 粘贴待分享文案
-        AccessibilityNodeInfo etNode = getChildByRegex(rootNodeInfo,etRegex);
-        if (etNode != null) {
-            etNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
-            etNode.performAction(AccessibilityNodeInfo.ACTION_PASTE); 
+        if (ShareInfo.hasText()){
+            ShareInfo.text = "";
+            
+            // 粘贴待分享文案
+            AccessibilityNodeInfo etNode = getChildByRegex(rootNodeInfo,etRegex);
+            if (etNode != null) {
+                etNode.performAction(AccessibilityNodeInfo.ACTION_FOCUS);
+                etNode.performAction(AccessibilityNodeInfo.ACTION_PASTE); 
+            }
         }
 
         step = Step.AllDone;
