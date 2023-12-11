@@ -188,20 +188,17 @@ public class AccessibilityListener extends AccessibilityService {
             }
             // 选图结束
             selectImageFinished();
-            
         }); 
     }
 
     // 选择图片完成
     private void selectImageFinished() {
         ShareInfo.waitingImageCount = 0;
-        timeScheduler(() -> {
-            step = Step.Upload;
-            AccessibilityNodeInfo rootNode = getRootNodeInfo();
-            if (rootNode != null) {
-                clickNodeByClassName(rootNode, btnRegex); 
-            }
-        }); 
+        step = Step.Upload;
+        AccessibilityNodeInfo rootNode = getRootNodeInfo();
+        if (rootNode != null) {
+            clickNodeByClassName(rootNode, btnRegex); 
+        } 
     }
 
     // 处理图文分享界面
